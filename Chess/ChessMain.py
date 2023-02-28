@@ -5,7 +5,7 @@ This is our main driver file. It will be responsible for handling user input and
 import pygame
 import ChessEngine
 
-WIDTH = HEIGHT = 400 #400 is another good option
+WIDTH = HEIGHT = 512 #400 is another good option
 DIMENSION = 8 
 SQ_SIZE = HEIGHT // DIMENSION
 MAX_FPS = 15 #for animation 
@@ -33,11 +33,33 @@ def main():
     gs = ChessEngine.GameState()
     loadImages() #only do this once, before the while loop
     running = True
+    sqSelected = () #no square is selected initially - will keep track of last click by user
+    playerClicks = [] #have 2 tuples [(from_row, from_col), (to_row, to_col)]
     
     while running:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 running = False
+                
+            elif event.type == pygame.MOUSEBUTTONDOWN:
+                location = pygame.mouse.get_pos() #(x,y) location of mouse
+                col = location[0]//SQ_SIZE
+                row = location[1]//SQ_SIZE
+
+                if sqSelected == (row,col): #user clicked same sqaure twice - undo action
+                    sqSelected = () #unselect
+                    playerClicks = [] #resetting this as well
+                else:
+                    sqSelected = (row,col)
+                    playerClicks.append(sqSelected) #append both 1st and 2nd click
+                
+                if len(playerClicks) == 2:
+                    move = ChessEngine.Move(playerClicks[0], playerClicks[1], gs.board)
+                    print(move.getChessNotation())
+                    gs.makeMove(move)
+                    sqSelected = ()
+                    playerClicks = []
+            
         drawGameState(screen, gs)
         clock.tick(MAX_FPS)
         pygame.display.flip()
