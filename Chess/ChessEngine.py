@@ -27,6 +27,8 @@ class GameState():
         self.moveLog = []
         self.whiteKingLocation = (7,4)
         self.blackKingLocation = (0,4)
+        self.checkMate = False
+        self.staleMate = False
         
         
     # takes a move as a parameter and executes it (will not work for castling and en-passant)
@@ -74,6 +76,16 @@ class GameState():
                 moves.remove(moves[i])
             self.whiteToMove = not self.whiteToMove
             self.undoMove()
+            
+        if len(moves) == 0:
+            if self.inCheck():
+                self.checkMate = True
+            else:
+                self.staleMate = True
+        
+        else: #for undoing the moves when the game has ended
+            self.cehckMate = False
+            self.staleMate = False
         
         return moves
         
